@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EPSA Llallagua - Recorrido Interactivo</title>
+  <style>
+    :root {
+      --bg1: #e5384b;
+      --bg2: #004080;
+      --glass: rgba(255, 255, 255, 0.15);
+      --glass-strong: rgba(255, 255, 255, 0.25);
+      --border: rgba(255, 255, 255, 0.35);
+      --text: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: linear-gradient(135deg, var(--bg1), var(--bg2));
+      color: var(--text);
+      margin: 0;
+      min-height: 100dvh;
+    }
+
+    header {
+      background-color: rgba(0, 0, 0, 0.55);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(6px);
+    }
+    header a {
+      color: var(--text);
+      text-decoration: none;
+      background: var(--glass);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      transition: transform .12s ease, background .2s ease;
+    }
+    header a:hover { background: var(--glass-strong); transform: translateY(-1px); }
+    header h1 { font-size: 1.25rem; margin: 0; letter-spacing: .3px; }
+
+    main { padding: 2rem 1rem 3rem; text-align: center; }
+    .intro { opacity: .95; }
+
+    .botones {
+      margin: 1.5rem auto 0;
+      display: flex;
+      gap: .75rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .botones button {
+      background: var(--glass);
+      color: var(--text);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+      padding: 12px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: transform .12s ease, background .2s ease, box-shadow .2s ease;
+      box-shadow: 0 6px 18px rgba(0,0,0,.25);
+    }
+    .botones button:hover { background: var(--glass-strong); transform: translateY(-1px) scale(1.01); }
+    .botones button.activo { outline: 2px solid #fff; box-shadow: 0 10px 25px rgba(0,0,0,.35); }
+
+    /* Contenedor de contenido dinámico */
+    .contenido {
+      width: min(900px, 92vw);
+      margin: 2rem auto 0;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.5rem;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.4);
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .35s ease, transform .35s ease;
+      text-align: left;
+    }
+    .contenido.active { opacity: 1; transform: translateY(0); }
+    .contenido h2 { margin: 0 0 .5rem; }
+    .contenido p { margin: .25rem 0 .75rem; line-height: 1.6; }
+
+    .three-container {
+      width: 100%;
+      height: clamp(260px, 38vw, 380px);
+      margin-top: 1rem;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    /* Evita que el canvas bloquee clics fuera del contenedor */
+    .three-container canvas { display: block; }
+
+    .galeria {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .75rem;
+      margin-top: 1rem;
+    }
+    .galeria img {
+      width: 100%;
+      aspect-ratio: 5 / 3;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      user-select: none;
+      -webkit-user-drag: none;
+      box-shadow: 0 6px 18px rgba(0,0,0,.25);
+    }
+    @media (max-width: 720px) { .galeria { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="index.html" aria-label="Volver al inicio">🏠 Inicio</a>
+    <h1>EPSA Llallagua</h1>
+  </header>
+
+  <main>
+    <p class="intro">Explora la información de EPSA Llallagua usando los botones:</p>
+
+    <div class="botones" role="tablist" aria-label="Secciones del recorrido">
+      <button type="button" data-seccion="historia" role="tab" aria-selected="false">Historia</button>
+      <button type="button" data-seccion="galeria" role="tab" aria-selected="false">Galería</button>
+      <button type="button" data-seccion="misionvision" role="tab" aria-selected="false">Misión y Visión</button>
+    </div>
+
+    <section id="contenido-dinamico" class="contenido" aria-live="polite" aria-atomic="true"></section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+  <script>
+    const botones = document.querySelectorAll('.botones button');
+    const contenido = document.getElementById('contenido-dinamico');
+
+    // Control de escena/animación actual para limpiar al cambiar
+    let current = { dispose: null, rafId: null };
+
+    const setActiveButton = (btn) => {
+      botones.forEach(b => {
+        const isActive = b === btn;
+        b.classList.toggle('activo', isActive);
+        b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+    };
+
+    const clearCurrent = () => {
+      if (current.rafId) cancelAnimationFrame(current.rafId);
+      if (current.dispose) current.dispose();
+      current = { dispose: null, rafId: null };
+    };
+
+    const mostrarSeccion = (seccion, btn) => {
+      // Estado visual
+      setActiveButton(btn);
+      contenido.classList.remove('active');
+
+      // Limpia animación/escena previa
+      clearCurrent();
+
+      // Cambia contenido
+      setTimeout(() => {
+        if (seccion === 'historia') {
+          contenido.innerHTML = `
+            <h2>Historia de EPSA Llallagua</h2>
+            <p>EPSA Llallagua nació con el propósito de atender las necesidades de agua potable, energía y tratamiento de aguas residuales de la comunidad.</p>
+            <div class="three-container" id="three-historia" aria-label="Animación 3D historia"></div>
+          `;
+          current = crearEscena3D('three-historia', 'historia');
+        } else if (seccion === 'galeria') {
+          contenido.innerHTML = `
+            <h2>Galería de EPSA Llallagua</h2>
+            <p>Imágenes de referencia (reemplaza por tus recursos locales cuando los tengas).</p>
+            <div class="galeria">
+              <img src="https://via.placeholder.com/800x480.png?text=Planta+de+Tratamiento" alt="Planta de tratamiento">
+              <img src="https://via.placeholder.com/800x480.png?text=Tanque+de+Agua" alt="Tanque de agua">
+              <img src="https://via.placeholder.com/800x480.png?text=Infraestructura" alt="Infraestructura de EPSA">
+            </div>
+          `;
+        } else {
+          contenido.innerHTML = `
+            <h2>Misión y Visión</h2>
+            <p><strong>Misión:</strong> Prestar servicios de agua potable y alcantarillado a la población de la Mancomunidad Bustillo, con equidad, calidad, continuidad, solidaridad y eficiencia, buscando la autosostenibilidad.</p>
+            <p><strong>Visión:</strong> Ser una entidad consolidada institucionalmente, identificada con la población a través de una gestión eficiente y transparente.</p>
+            <div class="three-container" id="three-mision" aria-label="Animación 3D misión y visión"></div>
+          `;
+          current = crearEscena3D('three-mision', 'mision');
+        }
+        requestAnimationFrame(() => contenido.classList.add('active'));
+      }, 120);
+    };
+
+    botones.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const seccion = btn.getAttribute('data-seccion');
+        mostrarSeccion(seccion, btn);
+      });
+    });
+
+    // Abre una por defecto
+    botones[0].click();
+
+    function crearEscena3D(containerId, tipo) {
+      const contenedor = document.getElementById(containerId);
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        Math.max(1, contenedor.clientWidth) / Math.max(1, contenedor.clientHeight),
+        0.1,
+        1000
+      );
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(contenedor.clientWidth, contenedor.clientHeight);
+      contenedor.appendChild(renderer.domElement);
+
+      // Luces
+      scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+      dirLight.position.set(5, 6, 4);
+      scene.add(dirLight);
+
+      // Geometría según sección
+      let mesh, geo, mat;
+      if (tipo === 'historia') {
+        geo = new THREE.BoxGeometry(1, 1, 1);
+        mat = new THREE.MeshStandardMaterial({ color: 0x00ff88, metalness: 0.2, roughness: 0.35 });
+      } else {
+        geo = new THREE.ConeGeometry(0.7, 1.5, 48);
+        mat = new THREE.MeshStandardMaterial({ color: 0xff5555, metalness: 0.1, roughness: 0.4 });
+      }
+      mesh = new THREE.Mesh(geo, mat);
+      scene.add(mesh);
+
+      camera.position.set(0, 0.2, 3);
+
+      // Animación
+      let rafId = null;
+      const animate = () => {
+        rafId = requestAnimationFrame(animate);
+        mesh.rotation.x += 0.01;
+        mesh.rotation.y += 0.01;
+        renderer.render(scene, camera);
+      };
+      animate();
+
+      // Responsive
+      const onResize = () => {
+        const w = Math.max(1, contenedor.clientWidth);
+        const h = Math.max(1, contenedor.clientHeight);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      };
+      window.addEventListener('resize', onResize);
+
+      // Función de limpieza al cambiar de sección
+      const dispose = () => {
+        window.removeEventListener('resize', onResize);
+        if (rafId) cancelAnimationFrame(rafId);
+        if (mesh) {
+          if (mesh.geometry) mesh.geometry.dispose();
+          if (mesh.material) mesh.material.dispose();
+          scene.remove(mesh);
+        }
+        renderer.dispose();
+        // limpia el nodo canvas
+        if (renderer.domElement && renderer.domElement.parentNode) {
+          renderer.domElement.parentNode.removeChild(renderer.domElement);
+        }
+      };
+
+      return { dispose, rafId };
+    }
+  </script>
+</body>
+</html>

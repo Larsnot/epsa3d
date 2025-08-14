@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EPSA Bolivia - Plataforma Interactiva</title>
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <img src="https://cdn.glitch.global/5c539339-6042-4b5a-b055-217e565e85d7/images.jpeg?1748455909134" alt="Logo EPSA Bolivia">
+      <div class="logo-text">
+        <h1>EPSA Bolivia</h1>
+        <p>Plataforma Interactiva 3D</p>
+      </div>
+    </div>
+    <nav>
+      <a class="cta-button" href="recorrido.html">Explorar</a>
+    </nav>
+  </header>
+  
+  <section class="hero">
+    <div id="threejs-container" aria-hidden="true"></div>
+    <div class="hero-content">
+      <h2>Descubre EPSA Bolivia en una nueva dimensión</h2>
+      <p>Explora nuestros servicios de agua potable, energía y proyectos sociales a través de una experiencia interactiva en 3D diseñada para la comunidad de Llallagua.</p>
+      <a class="cta-button" href="explorar.html">Comenzar recorrido</a>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="section-title">
+      <h2>Características Principales</h2>
+      <p>Una plataforma innovadora que transforma la manera de interactuar con los servicios públicos</p>
+    </div>
+    
+    <div class="features-grid">
+      <article class="feature-card">
+        <div class="feature-icon">💧</div>
+        <h3>Tratamiento de Agua</h3>
+        <p>Cómo funciona el proceso de purificación y distribución de agua potable en nuestra región.</p>
+      </article>
+      
+      <article class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Infraestructura Energética</h3>
+        <p>Conoce los sistemas de generación y distribución de energía administrados por EPSA Bolivia.</p>
+      </article>
+      
+      <article class="feature-card">
+        <div class="feature-icon">👨‍👩‍👧‍👦</div>
+        <h3>Proyectos Sociales</h3>
+        <p>Explora los programas comunitarios y de desarrollo sostenible implementados en Llallagua.</p>
+      </article>
+    </div>
+  </section>
+  
+  <section class="about">
+    <div class="about-content">
+      <div class="about-text">
+        <h2>Sobre este Proyecto</h2>
+        <p>Esta plataforma interactiva fue desarrollada como parte de un proyecto de investigación de la Universidad Nacional "Siglo XX", con el objetivo de modernizar los canales de comunicación entre EPSA Bolivia y la comunidad de Llallagua.</p>
+        <p>Utilizando tecnologías web avanzadas como Three.js y WebGL, hemos creado una experiencia inmersiva que facilita la comprensión de los servicios esenciales que ofrece la empresa.</p>
+        <p>El proyecto busca especialmente conectar con la población más joven, ofreciendo herramientas digitales interactivas y educativas.</p>
+      </div>
+      
+      <div class="about-image">
+        <div style="width:100%; height:100%; background: linear-gradient(135deg, #0066cc, #004080); display: flex; justify-content: center; align-items: center; color: white;">
+          <p>Visualización 3D interactiva</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <footer>
+    <div class="footer-content">
+      <div class="footer-column">
+        <h3>EPSA Bolivia</h3>
+        <p>Empresa encargada de servicios esenciales como agua potable, tratamiento de aguas residuales y energía en la región de Llallagua.</p>
+      </div>
+      
+      <div class="footer-column">
+        <h3>Contacto</h3>
+        <p>Llallagua, Potosí, Bolivia</p>
+        <p>Teléfono: +591 60461483</p>
+        <a href="mailto:contacto@epsa.gob.bo">contacto@epsa.gob.bo</a>
+      </div>
+      
+      <div class="footer-column">
+        <h3>Enlaces</h3>
+        <a href="https://www.epsa.gob.bo" target="_blank">Sitio web oficial</a>
+        <a href="#">Políticas de privacidad</a>
+        <a href="#">Términos de uso</a>
+      </div>
+    </div>
+    
+    <div class="copyright">
+      <p>&copy; 2025 EPSA Bolivia - Universidad Nacional "Siglo XX". Todos los derechos reservados.</p>
+    </div>
+  </footer>
+  
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('threejs-container');
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
+      camera.position.z = 5;
+      
+      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+      renderer.setSize(container.offsetWidth, container.offsetHeight);
+      container.appendChild(renderer.domElement);
+      
+      // Partículas
+      const particlesGeometry = new THREE.BufferGeometry();
+      const particleCount = 1000;
+      const posArray = new Float32Array(particleCount * 3);
+      for (let i = 0; i < particleCount * 3; i++) {
+        posArray[i] = (Math.random() - 0.5) * 10;
+      }
+      particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+      const particlesMaterial = new THREE.PointsMaterial({
+        size: 0.02,
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.8
+      });
+      const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+      scene.add(particlesMesh);
+      
+      function animate() {
+        requestAnimationFrame(animate);
+        particlesMesh.rotation.x += 0.0005;
+        particlesMesh.rotation.y += 0.0005;
+        renderer.render(scene, camera);
+      }
+      animate();
+      
+      window.addEventListener('resize', () => {
+        camera.aspect = container.offsetWidth / container.offsetHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.offsetWidth, container.offsetHeight);
+      });
+    });
+  </script>
+</body>
+</html>

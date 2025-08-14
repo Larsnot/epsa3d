@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EPSA Llallagua - Prototipo 3D</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #111;
+      font-family: Arial, sans-serif;
+    }
+    #threejs-container {
+      width: 100vw;
+      height: 100vh;
+    }
+    .volver {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: #0066cc;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: bold;
+      z-index: 10;
+      transition: background 0.3s ease;
+    }
+    .volver:hover {
+      background: #004a99;
+    }
+  </style>
+</head>
+<body>
+  <a class="volver" href="index.html">⬅ Volver</a>
+  <div id="threejs-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+  <script>
+    const container = document.getElementById('threejs-container');
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.set(10, 10, 15);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    container.appendChild(renderer.domElement);
+
+    // Luces
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(10, 20, 10);
+    scene.add(directionalLight);
+
+    // Suelo
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(50, 50),
+      new THREE.MeshStandardMaterial({ color: 0x444444 })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    scene.add(ground);
+
+    // Edificio principal (cubo)
+    const edificio = new THREE.Mesh(
+      new THREE.BoxGeometry(4, 4, 4),
+      new THREE.MeshStandardMaterial({ color: 0x0066cc })
+    );
+    edificio.position.set(0, 2, 0);
+    scene.add(edificio);
+
+    // Tanque de agua (cilindro)
+    const tanque = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.5, 1.5, 3, 32),
+      new THREE.MeshStandardMaterial({ color: 0x00aaff })
+    );
+    tanque.position.set(-6, 1.5, 0);
+    scene.add(tanque);
+
+    // Generador (esfera)
+    const generador = new THREE.Mesh(
+      new THREE.SphereGeometry(1.2, 32, 32),
+      new THREE.MeshStandardMaterial({ color: 0xff9900 })
+    );
+    generador.position.set(6, 1.2, 0);
+    scene.add(generador);
+
+    // Animación
+    function animate() {
+      requestAnimationFrame(animate);
+      edificio.rotation.y += 0.002;
+      tanque.rotation.y += 0.002;
+      generador.rotation.y += 0.002;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Ajuste al redimensionar
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
