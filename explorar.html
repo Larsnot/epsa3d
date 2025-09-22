@@ -1,110 +1,434 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EPSA Llallagua - Prototipo 3D</title>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background-color: #111;
-      font-family: Arial, sans-serif;
-    }
-    #threejs-container {
-      width: 100vw;
-      height: 100vh;
-    }
-    .volver {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      background: #0066cc;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 5px;
-      text-decoration: none;
-      font-size: 1rem;
-      font-weight: bold;
-      z-index: 10;
-      transition: background 0.3s ease;
-    }
-    .volver:hover {
-      background: #004a99;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorar - EPSA Llallagua</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-  <a class="volver" href="index.html">⬅ Volver</a>
-  <div id="threejs-container"></div>
+    <!-- Navegación -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-tint"></i>
+                <span>EPSA Llallagua</span>
+            </div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link">Inicio</a>
+                <a href="index.html#historia" class="nav-link">Historia</a>
+                <a href="index.html#servicios" class="nav-link">Servicios</a>
+                <a href="index.html#galeria" class="nav-link">Galería</a>
+                <a href="recorrido.html" class="nav-link">Recorrido 3D</a>
+                <a href="#" class="nav-link active">Explorar</a>
+                <a href="index.html#contacto" class="nav-link">Contacto</a>
+            </div>
+        </div>
+    </nav>
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
-  <script>
-    const container = document.getElementById('threejs-container');
+    <!-- Hero Section -->
+    <section class="explore-hero">
+        <div class="explore-hero-bg">
+            <div id="explore-canvas"></div>
+        </div>
+        <div class="explore-hero-content">
+            <h1>Explora EPSA Llallagua</h1>
+            <p>Descubre interactivamente nuestros procesos, tecnologías y servicios</p>
+        </div>
+    </section>
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-    camera.position.set(10, 10, 15);
-    camera.lookAt(0, 0, 0);
+    <!-- Menú de Exploración -->
+    <section class="explore-menu">
+        <div class="container">
+            <div class="explore-grid">
+                <div class="explore-card" data-explore="procesos">
+                    <div class="explore-card-bg">
+                        <canvas class="explore-card-canvas" id="procesos-canvas"></canvas>
+                    </div>
+                    <div class="explore-card-content">
+                        <div class="explore-icon">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <h3>Procesos de Tratamiento</h3>
+                        <p>Explora paso a paso cómo transformamos el agua cruda en agua potable de calidad</p>
+                        <div class="explore-features">
+                            <span><i class="fas fa-eye"></i> Vista 360°</span>
+                            <span><i class="fas fa-info-circle"></i> Información detallada</span>
+                            <span><i class="fas fa-play"></i> Animaciones</span>
+                        </div>
+                        <button class="explore-btn">
+                            <i class="fas fa-arrow-right"></i>
+                            Explorar Procesos
+                        </button>
+                    </div>
+                </div>
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    container.appendChild(renderer.domElement);
+                <div class="explore-card" data-explore="instalaciones">
+                    <div class="explore-card-bg">
+                        <canvas class="explore-card-canvas" id="instalaciones-canvas"></canvas>
+                    </div>
+                    <div class="explore-card-content">
+                        <div class="explore-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <h3>Instalaciones</h3>
+                        <p>Recorre virtualmente todas nuestras instalaciones y conoce su funcionamiento</p>
+                        <div class="explore-features">
+                            <span><i class="fas fa-vr-cardboard"></i> Recorrido VR</span>
+                            <span><i class="fas fa-map"></i> Mapa interactivo</span>
+                            <span><i class="fas fa-camera"></i> Fotografías HD</span>
+                        </div>
+                        <button class="explore-btn">
+                            <i class="fas fa-arrow-right"></i>
+                            Recorrer Instalaciones
+                        </button>
+                    </div>
+                </div>
 
-    // Luces
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(10, 20, 10);
-    scene.add(directionalLight);
+                <div class="explore-card" data-explore="red">
+                    <div class="explore-card-bg">
+                        <canvas class="explore-card-canvas" id="red-canvas"></canvas>
+                    </div>
+                    <div class="explore-card-content">
+                        <div class="explore-icon">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <h3>Red de Distribución</h3>
+                        <p>Visualiza cómo el agua llega desde nuestras plantas hasta tu hogar</p>
+                        <div class="explore-features">
+                            <span><i class="fas fa-route"></i> Trazado de rutas</span>
+                            <span><i class="fas fa-chart-line"></i> Datos en tiempo real</span>
+                            <span><i class="fas fa-map-marked"></i> Cobertura</span>
+                        </div>
+                        <button class="explore-btn">
+                            <i class="fas fa-arrow-right"></i>
+                            Ver Red
+                        </button>
+                    </div>
+                </div>
 
-    // Suelo
-    const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(50, 50),
-      new THREE.MeshStandardMaterial({ color: 0x444444 })
-    );
-    ground.rotation.x = -Math.PI / 2;
-    scene.add(ground);
+                <div class="explore-card" data-explore="laboratorio">
+                    <div class="explore-card-bg">
+                        <canvas class="explore-card-canvas" id="laboratorio-canvas"></canvas>
+                    </div>
+                    <div class="explore-card-content">
+                        <div class="explore-icon">
+                            <i class="fas fa-flask"></i>
+                        </div>
+                        <h3>Laboratorio de Calidad</h3>
+                        <p>Conoce los análisis y pruebas que garantizan la calidad del agua</p>
+                        <div class="explore-features">
+                            <span><i class="fas fa-microscope"></i> Equipos especializados</span>
+                            <span><i class="fas fa-clipboard-check"></i> Protocolos</span>
+                            <span><i class="fas fa-certificate"></i> Certificaciones</span>
+                        </div>
+                        <button class="explore-btn">
+                            <i class="fas fa-arrow-right"></i>
+                            Visitar Laboratorio
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    // Edificio principal (cubo)
-    const edificio = new THREE.Mesh(
-      new THREE.BoxGeometry(4, 4, 4),
-      new THREE.MeshStandardMaterial({ color: 0x0066cc })
-    );
-    edificio.position.set(0, 2, 0);
-    scene.add(edificio);
+    <!-- Sección de Exploración Activa -->
+    <section class="active-exploration" id="active-exploration" style="display: none;">
+        <div class="exploration-header">
+            <div class="container">
+                <div class="exploration-nav">
+                    <button class="back-btn" id="back-to-menu">
+                        <i class="fas fa-arrow-left"></i>
+                        Volver al Menú
+                    </button>
+                    <div class="exploration-title">
+                        <h2 id="exploration-title">Título de Exploración</h2>
+                        <p id="exploration-subtitle">Subtítulo descriptivo</p>
+                    </div>
+                    <div class="exploration-controls">
+                        <button class="control-btn" id="toggle-info">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                        <button class="control-btn" id="toggle-fullscreen">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    // Tanque de agua (cilindro)
-    const tanque = new THREE.Mesh(
-      new THREE.CylinderGeometry(1.5, 1.5, 3, 32),
-      new THREE.MeshStandardMaterial({ color: 0x00aaff })
-    );
-    tanque.position.set(-6, 1.5, 0);
-    scene.add(tanque);
+        <div class="exploration-content">
+            <div class="exploration-main">
+                <canvas id="exploration-canvas"></canvas>
+                
+                <!-- Panel de información -->
+                <div class="info-panel" id="info-panel">
+                    <div class="info-panel-header">
+                        <h3 id="info-panel-title">Información</h3>
+                        <button class="info-panel-close">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="info-panel-content" id="info-panel-content">
+                        <!-- Contenido dinámico -->
+                    </div>
+                </div>
 
-    // Generador (esfera)
-    const generador = new THREE.Mesh(
-      new THREE.SphereGeometry(1.2, 32, 32),
-      new THREE.MeshStandardMaterial({ color: 0xff9900 })
-    );
-    generador.position.set(6, 1.2, 0);
-    scene.add(generador);
+                <!-- Controles de la exploración -->
+                <div class="exploration-ui">
+                    <div class="ui-group timeline" id="timeline-group" style="display: none;">
+                        <div class="timeline-header">
+                            <h4>Proceso paso a paso</h4>
+                            <div class="timeline-controls">
+                                <button id="play-timeline"><i class="fas fa-play"></i></button>
+                                <button id="pause-timeline"><i class="fas fa-pause"></i></button>
+                                <button id="reset-timeline"><i class="fas fa-redo"></i></button>
+                            </div>
+                        </div>
+                        <div class="timeline-progress">
+                            <div class="progress-track">
+                                <div class="progress-fill" id="timeline-progress"></div>
+                                <div class="progress-handle" id="timeline-handle"></div>
+                            </div>
+                        </div>
+                        <div class="timeline-steps" id="timeline-steps">
+                            <!-- Pasos del proceso -->
+                        </div>
+                    </div>
 
-    // Animación
-    function animate() {
-      requestAnimationFrame(animate);
-      edificio.rotation.y += 0.002;
-      tanque.rotation.y += 0.002;
-      generador.rotation.y += 0.002;
-      renderer.render(scene, camera);
-    }
-    animate();
+                    <div class="ui-group hotspots" id="hotspots-group">
+                        <div class="hotspots-list" id="hotspots-list">
+                            <!-- Puntos de interés -->
+                        </div>
+                    </div>
 
-    // Ajuste al redimensionar
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-  </script>
+                    <div class="ui-group measurements" id="measurements-group" style="display: none;">
+                        <div class="measurements-header">
+                            <h4>Datos en Tiempo Real</h4>
+                        </div>
+                        <div class="measurements-grid" id="measurements-grid">
+                            <!-- Mediciones dinámicas -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Miniatura de navegación -->
+            <div class="exploration-thumbnail" id="exploration-thumbnail">
+                <div class="thumbnail-header">
+                    <span>Vista General</span>
+                    <button class="thumbnail-toggle">
+                        <i class="fas fa-chevron-up"></i>
+                    </button>
+                </div>
+                <div class="thumbnail-content">
+                    <canvas id="thumbnail-canvas"></canvas>
+                    <div class="thumbnail-indicator" id="thumbnail-indicator"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Recursos Educativos -->
+    <section class="educational-resources">
+        <div class="container">
+            <div class="section-header">
+                <h2>Recursos Educativos</h2>
+                <div class="section-line"></div>
+                <p>Material complementario para aprender más sobre el tratamiento de agua</p>
+            </div>
+
+            <div class="resources-tabs">
+                <button class="tab-btn active" data-tab="videos">Videos</button>
+                <button class="tab-btn" data-tab="documentos">Documentos</button>
+                <button class="tab-btn" data-tab="infografias">Infografías</button>
+                <button class="tab-btn" data-tab="simuladores">Simuladores</button>
+            </div>
+
+            <div class="resources-content">
+                <div class="tab-content active" id="videos">
+                    <div class="resources-grid">
+                        <div class="resource-card">
+                            <div class="resource-thumbnail">
+                                <canvas class="resource-canvas" data-type="video"></canvas>
+                                <div class="play-overlay">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="resource-info">
+                                <h3>Proceso de Potabilización</h3>
+                                <p>Video explicativo del proceso completo de tratamiento</p>
+                                <div class="resource-meta">
+                                    <span><i class="fas fa-clock"></i> 5:30 min</span>
+                                    <span><i class="fas fa-eye"></i> 1.2K vistas</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="resource-card">
+                            <div class="resource-thumbnail">
+                                <canvas class="resource-canvas" data-type="video"></canvas>
+                                <div class="play-overlay">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="resource-info">
+                                <h3>Control de Calidad</h3>
+                                <p>Cómo se realizan los análisis de calidad del agua</p>
+                                <div class="resource-meta">
+                                    <span><i class="fas fa-clock"></i> 3:45 min</span>
+                                    <span><i class="fas fa-eye"></i> 850 vistas</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="resource-card">
+                            <div class="resource-thumbnail">
+                                <canvas class="resource-canvas" data-type="video"></canvas>
+                                <div class="play-overlay">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="resource-info">
+                                <h3>Red de Distribución</h3>
+                                <p>Sistema de tuberías y bombeo de agua potable</p>
+                                <div class="resource-meta">
+                                    <span><i class="fas fa-clock"></i> 4:20 min</span>
+                                    <span><i class="fas fa-eye"></i> 690 vistas</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="documentos">
+                    <div class="resources-grid">
+                        <div class="resource-card document">
+                            <div class="resource-thumbnail">
+                                <div class="document-icon">
+                                    <i class="fas fa-file-pdf"></i>
+                                </div>
+                            </div>
+                            <div class="resource-info">
+                                <h3>Manual de Procesos</h3>
+                                <p>Documentación técnica completa de nuestros procesos</p>
+                                <div class="resource-meta">
+                                    <span><i class="fas fa-download"></i> 245 descargas</span>
+                                    <span><i class="fas fa-file-pdf"></i> PDF - 2.1 MB</span>
+                                </div>
+                                <button class="download-btn">
+                                    <i class="fas fa-download"></i> Descargar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="resource-card document">
+                            <div class="resource-thumbnail">
+                                <div class="document-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                            </div>
+                            <div class="resource-info">
+                                <h3>Estándares de Calidad</h3>
+                                <p>Normas y parámetros de calidad que cumplimos</p>
+                                <div class="resource-meta">
+                                    <span><i class="fas fa-download"></i> 189 descargas</span>
+                                    <span><i class="fas fa-file-alt"></i> DOC - 1.5 MB</span>
+                                </div>
+                                <button class="download-btn">
+                                    <i class="fas fa-download"></i> Descargar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="infografias">
+                    <div class="infographics-gallery">
+                        <div class="infographic-item">
+                            <div class="infographic-preview">
+                                <canvas class="infographic-canvas"></canvas>
+                            </div>
+                            <div class="infographic-overlay">
+                                <h3>Ciclo del Agua</h3>
+                                <button class="view-btn">Ver Completa</button>
+                            </div>
+                        </div>
+
+                        <div class="infographic-item">
+                            <div class="infographic-preview">
+                                <canvas class="infographic-canvas"></canvas>
+                            </div>
+                            <div class="infographic-overlay">
+                                <h3>Proceso de Tratamiento</h3>
+                                <button class="view-btn">Ver Completa</button>
+                            </div>
+                        </div>
+
+                        <div class="infographic-item">
+                            <div class="infographic-preview">
+                                <canvas class="infographic-canvas"></canvas>
+                            </div>
+                            <div class="infographic-overlay">
+                                <h3>Consumo Responsable</h3>
+                                <button class="view-btn">Ver Completa</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="simuladores">
+                    <div class="simulators-grid">
+                        <div class="simulator-card">
+                            <div class="simulator-preview">
+                                <canvas class="simulator-canvas" id="simulator1"></canvas>
+                            </div>
+                            <div class="simulator-info">
+                                <h3>Simulador de Tratamiento</h3>
+                                <p>Experimenta con diferentes parámetros del proceso</p>
+                                <button class="launch-btn">
+                                    <i class="fas fa-play-circle"></i> Iniciar Simulador
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="simulator-card">
+                            <div class="simulator-preview">
+                                <canvas class="simulator-canvas" id="simulator2"></canvas>
+                            </div>
+                            <div class="simulator-info">
+                                <h3>Calculadora de Consumo</h3>
+                                <p>Calcula tu consumo de agua y huella hídrica</p>
+                                <button class="launch-btn">
+                                    <i class="fas fa-calculator"></i> Abrir Calculadora
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer simplificado -->
+    <footer class="footer-minimal">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <i class="fas fa-tint"></i>
+                    <span>EPSA Llallagua</span>
+                </div>
+                <nav class="footer-nav">
+                    <a href="index.html">Inicio</a>
+                    <a href="recorrido.html">Recorrido 3D</a>
+                    <a href="index.html#contacto">Contacto</a>
+                </nav>
+            </div>
+        </div>
+    </footer>
+
+    <script src="explore-script.js"></script>
 </body>
 </html>
